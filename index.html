@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deteksi Tangan dengan TensorFlow.js</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/9.0.1/adapter.js" integrity="sha512-3LmU0dvXag+r5tTv52DO6EuV81YXQ2MIfqmT1zfsP3VSMhPoKD7PTqTZMvNNfBdjgk4u2tlCKjuJTOpw7Pj63g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/handpose"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+    <title>Deteksi Wajah dengan face-api.js</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
     <style>
         body {
             display: flex;
@@ -53,29 +51,17 @@
             });
         }
 
-        async function detectHands(handpose) {
-            const predictions = await handpose.estimateHands(video);
-            if (predictions.length > 0) {
-                drawHands(predictions);
-            }
-
-            requestAnimationFrame(() => detectHands(handpose));
-        }
-
-        function drawHands(predictions) {
+        async function detectFaces() {
+            const detections = await faceapi.detectAllFaces(video);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            predictions.forEach(prediction => {
-                const landmarks = prediction.landmarks;
-                for (let i = 0; i < landmarks.length; i++) {
-                    const [x, y] = landmarks[i];
-                    ctx.beginPath();
-                    ctx.arc(x, y, 5, 0, 2 * Math.PI);
-                    ctx.fillStyle = "red";
-                    ctx.fill();
-                }
+            detections.forEach(detection => {
+                const { x, y, width, height } = detection.detection.box;
+                ctx.strokeStyle = 'red';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, y, width, height);
             });
+            requestAnimationFrame(detectFaces);
         }
 
         async function main() {
@@ -84,11 +70,12 @@
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
 
-            // Load the HandPose model
-            const handpose = await handpose.load();
-            console.log("Model HandPose loaded.");
-            
-            detectHands(handpose);
+            // Load models
+            await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+            await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+            await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
+
+            detectFaces();
         }
 
         main();
