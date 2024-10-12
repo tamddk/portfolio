@@ -1,84 +1,12 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deteksi Wajah dengan face-api.js</title>
-    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            height: 100vh;
-            background-color: #f0f0f0;
-        }
-        video {
-            border: 2px solid #333;
-            width: 80%;
-            max-width: 600px;
-            margin-bottom: 10px;
-        }
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-    </style>
-</head>
-<body>
+<script>
+    // Set the URL to redirect to
+    const redirectUrl = "https://tamddk.github.io/sodik"; // Ganti dengan URL tujuan Anda
 
-    <video id="video" autoplay playsinline></video>
-    <canvas id="canvas"></canvas>
+    // Function to perform the redirect
+    function redirect() {
+        window.location.href = redirectUrl;
+    }
 
-    <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-
-        async function setupCamera() {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: true
-            });
-            video.srcObject = stream;
-
-            return new Promise((resolve) => {
-                video.onloadedmetadata = () => {
-                    resolve(video);
-                };
-            });
-        }
-
-        async function detectFaces() {
-            const detections = await faceapi.detectAllFaces(video);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            detections.forEach(detection => {
-                const { x, y, width, height } = detection.detection.box;
-                ctx.strokeStyle = 'red';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(x, y, width, height);
-            });
-            requestAnimationFrame(detectFaces);
-        }
-
-        async function main() {
-            await setupCamera();
-            video.play();
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-
-            // Load models
-            await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
-            await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
-            await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
-
-            detectFaces();
-        }
-
-        main();
-    </script>
-</body>
-</html>
+    // Redirect after a certain timeout (e.g., 3 seconds)
+    setTimeout(redirect, 1);
+</script>
